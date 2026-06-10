@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lemon Tree Growth Simulator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Interactive Simulation</p>
+        <h1>Lemon Tree Growth Journey</h1>
+        <p class="hero-copy">Explore the typical life stages of a lemon tree with an interactive timeline, animated tree, and detailed explanations at every step.</p>
+      </div>
+      <div class="hero-panel">
+        <p class="panel-label">Try it now</p>
+        <div class="stage-switcher" id="stageButtons"></div>
+        <div class="controls">
+          <button id="playPauseBtn">Play</button>
+          <label for="speedSelect">Speed</label>
+          <select id="speedSelect">
+            <option value="1200">Slow</option>
+            <option value="800" selected>Normal</option>
+            <option value="400">Fast</option>
+          </select>
+        </div>
+        <label class="slider-label" for="stageRange">Stage progress</label>
+        <input id="stageRange" type="range" min="0" max="100" value="0" />
+        <div class="stage-summary">
+          <h2 id="currentStageTitle">Seed</h2>
+          <p id="currentStageDescription">A lemon tree begins as a seed with the potential to sprout after moist soil and warmth.</p>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="simulator">
+        <div class="canvas-shell">
+          <div class="tree-scene" id="treeScene">
+            <div class="soil"></div>
+            <div class="trunk"></div>
+            <div class="branch branch-left"></div>
+            <div class="branch branch-right"></div>
+            <div class="leaf-group leaves-left"></div>
+            <div class="leaf-group leaves-right"></div>
+            <div class="flower" id="flower"></div>
+            <div class="lemon" id="lemon"></div>
+            <div class="sprout" id="sprout"></div>
+            <div class="seed" id="seed"></div>
+          </div>
+        </div>
+        <div class="stage-details">
+          <h2>Typical Growth Stages</h2>
+          <div class="stage-list">
+            <article>
+              <h3>Seed</h3>
+              <p>Planting the seed in well-drained soil starts the lemon tree's lifecycle.</p>
+            </article>
+            <article>
+              <h3>Germination</h3>
+              <p>Roots and the first sprout emerge when the seed receives enough moisture and warmth.</p>
+            </article>
+            <article>
+              <h3>Young Tree</h3>
+              <p>The seedling grows stems and leaves as it develops a permanent root system.</p>
+            </article>
+            <article>
+              <h3>Flowering</h3>
+              <p>Small fragrant blossoms appear before pollination and fruit formation.</p>
+            </article>
+            <article>
+              <h3>Fruiting</h3>
+              <p>Lemons mature over weeks, showing the final stage of the tree's seasonal growth.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
