@@ -3,40 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lemon Tree Growth Simulator</title>
+  <title>Lemon Store Simulator</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="page-shell">
-    <header class="hero">
-      <div>
-        <p class="eyebrow">Interactive Simulation</p>
-        <h1>Lemon Tree Growth Journey</h1>
-        <p class="hero-copy">Explore the typical life stages of a lemon tree with an interactive timeline, animated tree, and detailed explanations at every step.</p>
-      </div>
-      <div class="hero-panel">
-        <p class="panel-label">Try it now</p>
-        <div class="stage-switcher" id="stageButtons"></div>
-        <div class="controls">
-          <button id="playPauseBtn">Play</button>
-          <label for="speedSelect">Speed</label>
-          <select id="speedSelect">
-            <option value="1200">Slow</option>
-            <option value="800" selected>Normal</option>
-            <option value="400">Fast</option>
-          </select>
-        </div>
-        <label class="slider-label" for="stageRange">Stage progress</label>
-        <input id="stageRange" type="range" min="0" max="100" value="0" />
-        <div class="stage-summary">
-          <h2 id="currentStageTitle">Seed</h2>
-          <p id="currentStageDescription">A lemon tree begins as a seed with the potential to sprout after moist soil and warmth.</p>
-        </div>
-      </div>
-    </header>
+    <main class="game-layout">
+      <section class="click-column">
+        <h1>Lemon Store Simulator</h1>
+        <p class="hero-copy">Click the giant lemon to harvest lemons and fund upgrades.</p>
 
-    <main>
-      <section class="simulator">
+        <button id="lemonClickBtn" class="lemon-button" type="button" aria-label="Pick a lemon">🍋</button>
+
+        <div class="stats-row">
+          <article>
+            <p>Total Lemons</p>
+            <h2 id="lemonCount">0</h2>
+          </article>
+          <article>
+            <p>Lemons Per Click</p>
+            <h2 id="lemonsPerClick">1</h2>
+          </article>
+          <article>
+            <p>Lemons Per Second</p>
+            <h2 id="lemonsPerSecond">0</h2>
+          </article>
+        </div>
+      </section>
+
+      <section class="sim-column">
+        <h2 class="column-title">Lemon Tree Growth</h2>
         <div class="canvas-shell">
           <div class="tree-scene" id="treeScene">
             <div class="soil"></div>
@@ -57,40 +53,18 @@
             <div class="seed" id="seed"></div>
           </div>
         </div>
-        <div class="stage-details">
-          <h2>Typical Growth Stages</h2>
-          <div class="stage-list">
-            <article>
-              <h3>Seed</h3>
-              <p>Planting the seed in well-drained soil starts the lemon tree's lifecycle.</p>
-            </article>
-            <article>
-              <h3>Germination</h3>
-              <p>Roots and the first sprout emerge when the seed receives enough moisture and warmth.</p>
-            </article>
-            <article>
-              <h3>Seedling</h3>
-              <p>The seed sends up a small stem and first leaves while still relying on steady moisture.</p>
-            </article>
-            <article>
-              <h3>Sapling</h3>
-              <p>The young plant thickens and strengthens as it prepares for sustained above-ground growth.</p>
-            </article>
-            <article>
-              <h3>Young Tree</h3>
-              <p>The seedling grows stems and leaves as it develops a permanent root system.</p>
-            </article>
-            <article>
-              <h3>Flowering</h3>
-              <p>Small fragrant blossoms appear before pollination and fruit formation.</p>
-            </article>
-            <article>
-              <h3>Fruiting</h3>
-              <p>Lemons mature over weeks, showing the final stage of the tree's seasonal growth.</p>
-            </article>
-          </div>
+
+        <div class="stage-summary">
+          <h2 id="currentStageTitle">Seed</h2>
+          <p id="currentStageDescription">A lemon tree begins as a seed with the potential to sprout after moist soil and warmth.</p>
         </div>
       </section>
+
+      <aside class="store-column">
+        <h2 class="column-title">Store</h2>
+        <p class="panel-copy">Spend lemons to grow faster and increase profits.</p>
+        <div id="upgradeList" class="upgrade-list"></div>
+      </aside>
     </main>
   </div>
 

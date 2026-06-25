@@ -43,88 +43,172 @@ const stages = [
   },
 ];
 
-const stageButtons = document.getElementById("stageButtons");
-const currentStageTitle = document.getElementById("currentStageTitle");
-const currentStageDescription = document.getElementById("currentStageDescription");
-const stageRange = document.getElementById("stageRange");
-const playPauseBtn = document.getElementById("playPauseBtn");
-const speedSelect = document.getElementById("speedSelect");
+const upgrades = [
+  {
+    id: "click-power",
+    name: "Bigger Basket",
+    description: "+1 lemon per click",
+    baseCost: 20,
+    type: "click",
+    amount: 1,
+    owned: 0,
+  },
+  {
+    id: "multiplier",
+    name: "Store Branding",
+    description: "x1.2 total click multiplier",
+    baseCost: 120,
+    type: "multiplier",
+    amount: 0.2,
+    owned: 0,
+  },
+  {
+    id: "autoclicker",
+    name: "Picking Assistant",
+    description: "+1 lemon per second",
+    baseCost: 50,
+    type: "auto",
+    amount: 1,
+    owned: 0,
+  },
+  {
+    id: "orchard-team",
+    name: "Orchard Team",
+    description: "+5 lemons per second",
+    baseCost: 280,
+    type: "auto",
+    amount: 5,
+    owned: 0,
+  },
+];
+
+const lemonClickBtn = document.getElementById("lemonClickBtn");
+const lemonCountEl = document.getElementById("lemonCount");
+const lemonsPerClickEl = document.getElementById("lemonsPerClick");
+const lemonsPerSecondEl = document.getElementById("lemonsPerSecond");
+const stageTitleEl = document.getElementById("currentStageTitle");
+const stageDescriptionEl = document.getElementById("currentStageDescription");
 const treeScene = document.getElementById("treeScene");
+const upgradeList = document.getElementById("upgradeList");
 
+let lemons = 0;
+let clickBase = 1;
+let clickMultiplier = 1;
+let lemonsPerSecond = 0;
 let activeStageIndex = 0;
-let animationTimer = null;
-let isPlaying = false;
 
-function createButtons() {
-  stageButtons.innerHTML = "";
-  stages.forEach((stage, index) => {
-    const button = document.createElement("button");
-    button.textContent = stage.name;
-    button.type = "button";
-    button.addEventListener("click", () => setStage(index));
-    stageButtons.appendChild(button);
-  });
+function getCurrentClickValue() {
+  return Math.max(1, Math.floor(clickBase * clickMultiplier));
 }
 
-function highlightActiveButton() {
-  const buttons = stageButtons.querySelectorAll("button");
-  buttons.forEach((button, index) => {
-    button.classList.toggle("active", index === activeStageIndex);
-  });
+function formatNumber(value) {
+  return new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 }).format(value);
 }
 
-function updateDisplay() {
+function getUpgradeCost(upgrade) {
+  return Math.floor(upgrade.baseCost * Math.pow(1.35, upgrade.owned));
+}
+
+function updateStageDisplay() {
   const stage = stages[activeStageIndex];
-  currentStageTitle.textContent = stage.name;
-  currentStageDescription.textContent = stage.description;
+  stageTitleEl.textContent = stage.name;
+  stageDescriptionEl.textContent = stage.description;
   treeScene.className = `tree-scene ${stage.className}`;
-  stageRange.value = (activeStageIndex / (stages.length - 1)) * 100;
-  highlightActiveButton();
 }
 
-function setStage(index) {
-  activeStageIndex = Math.max(0, Math.min(stages.length - 1, index));
-  updateDisplay();
+function tickStage() {
+  activeStageIndex = (activeStageIndex + 1) % stages.length;
+  updateStageDisplay();
 }
 
-function playSimulation() {
-  if (isPlaying) {
-    pauseSimulation();
+function updateStats() {
+  lemonCountEl.textContent = formatNumber(Math.floor(lemons));
+  lemonsPerClickEl.textContent = formatNumber(getCurrentClickValue());
+  lemonsPerSecondEl.textContent = formatNumber(lemonsPerSecond);
+}
+
+function renderUpgrades() {
+  upgradeList.innerHTML = "";
+
+  upgrades.forEach((upgrade) => {
+    const cost = getUpgradeCost(upgrade);
+    const canAfford = lemons >= cost;
+
+    const card = document.createElement("article");
+    card.className = "upgrade-card";
+
+    const title = document.createElement("h3");
+    title.textContent = upgrade.name;
+
+    const desc = document.createElement("p");
+    desc.textContent = `${upgrade.description} | Owned: ${upgrade.owned}`;
+
+    const meta = document.createElement("div");
+    meta.className = "upgrade-meta";
+
+    const costLabel = document.createElement("strong");
+    costLabel.textContent = `${formatNumber(cost)} lemons`;
+
+    const buyButton = document.createElement("button");
+    buyButton.type = "button";
+    buyButton.className = "upgrade-buy";
+    buyButton.textContent = canAfford ? "Buy" : "Need more";
+    buyButton.disabled = !canAfford;
+    buyButton.addEventListener("click", () => buyUpgrade(upgrade.id));
+
+    meta.appendChild(costLabel);
+    meta.appendChild(buyButton);
+
+    card.appendChild(title);
+    card.appendChild(desc);
+    card.appendChild(meta);
+    upgradeList.appendChild(card);
+  });
+}
+
+function buyUpgrade(id) {
+  const upgrade = upgrades.find((item) => item.id === id);
+  if (!upgrade) {
     return;
   }
-  isPlaying = true;
-  playPauseBtn.textContent = "Pause";
-  animationTimer = setInterval(() => {
-    if (activeStageIndex < stages.length - 1) {
-      setStage(activeStageIndex + 1);
-    } else {
-      pauseSimulation();
-    }
-  }, Number(speedSelect.value));
-}
 
-function pauseSimulation() {
-  isPlaying = false;
-  playPauseBtn.textContent = "Play";
-  clearInterval(animationTimer);
-  animationTimer = null;
-}
-
-stageRange.addEventListener("input", () => {
-  const position = Number(stageRange.value) / 100;
-  const nextIndex = Math.round(position * (stages.length - 1));
-  setStage(nextIndex);
-  pauseSimulation();
-});
-
-playPauseBtn.addEventListener("click", playSimulation);
-
-speedSelect.addEventListener("change", () => {
-  if (isPlaying) {
-    pauseSimulation();
-    playSimulation();
+  const cost = getUpgradeCost(upgrade);
+  if (lemons < cost) {
+    return;
   }
-});
 
-createButtons();
-updateDisplay();
+  lemons -= cost;
+  upgrade.owned += 1;
+
+  if (upgrade.type === "click") {
+    clickBase += upgrade.amount;
+  } else if (upgrade.type === "multiplier") {
+    clickMultiplier += upgrade.amount;
+  } else if (upgrade.type === "auto") {
+    lemonsPerSecond += upgrade.amount;
+  }
+
+  updateStats();
+  renderUpgrades();
+}
+
+function clickLemon() {
+  lemons += getCurrentClickValue();
+  updateStats();
+  renderUpgrades();
+}
+
+function autoLemonTick() {
+  lemons += lemonsPerSecond / 4;
+  updateStats();
+  renderUpgrades();
+}
+
+lemonClickBtn.addEventListener("click", clickLemon);
+
+updateStageDisplay();
+updateStats();
+renderUpgrades();
+
+setInterval(tickStage, 5000);
+setInterval(autoLemonTick, 250);
