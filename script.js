@@ -310,9 +310,14 @@ function createTreeSceneElement() {
   return scene;
 }
 
+function getTopMostAvailableTreeRow() {
+  const maxTreesPerRow = getTreesPerRow();
+  return treeRows.find((row) => row.children.length < maxTreesPerRow) ?? null;
+}
+
 function addTreeIfSpaceAvailable() {
-  let activeRow = treeRows[treeRows.length - 1];
-  if (!activeRow || activeRow.children.length >= getTreesPerRow()) {
+  let activeRow = getTopMostAvailableTreeRow();
+  if (!activeRow) {
     activeRow = createTreeRowTrack();
   }
 
@@ -431,8 +436,40 @@ function buyUpgrade(id) {
   renderUpgrades();
 }
 
-function clickLemon() {
-  lemons += getCurrentClickValue();
+function getClickOrigin(event) {
+  if (event && Number.isFinite(event.clientX) && Number.isFinite(event.clientY)) {
+    return { x: event.clientX, y: event.clientY };
+  }
+
+  const lemonBounds = lemonClickBtn.getBoundingClientRect();
+  return {
+    x: lemonBounds.left + lemonBounds.width / 2,
+    y: lemonBounds.top + lemonBounds.height / 2,
+  };
+}
+
+function showClickGainPopup(gainAmount, event) {
+  const origin = getClickOrigin(event);
+  const popup = document.createElement("div");
+  popup.className = "click-gain-popup";
+  popup.textContent = `+${formatNumber(gainAmount)} Lemons 🍋`;
+  popup.style.left = `${origin.x}px`;
+  popup.style.top = `${origin.y}px`;
+  document.body.appendChild(popup);
+
+  popup.addEventListener(
+    "animationend",
+    () => {
+      popup.remove();
+    },
+    { once: true }
+  );
+}
+
+function clickLemon(event) {
+  const gainAmount = getCurrentClickValue();
+  lemons += gainAmount;
+  showClickGainPopup(gainAmount, event);
   updateStats();
   renderUpgrades();
 }

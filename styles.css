@@ -107,6 +107,37 @@ h1 {
   filter: drop-shadow(0 3px 6px rgba(97, 66, 6, 0.16));
 }
 
+.click-gain-popup {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 50;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  font-weight: 700;
+  font-size: clamp(0.9rem, 1.4vw, 1.1rem);
+  color: #4f3808;
+  text-shadow: 0 1px 0 rgba(255, 245, 201, 0.9), 0 0 8px rgba(255, 222, 120, 0.45);
+  animation: click-gain-float 0.85s ease-out forwards;
+}
+
+@keyframes click-gain-float {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.82);
+  }
+
+  15% {
+    opacity: 1;
+    transform: translate(-50%, -58%) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -145%) scale(1.06);
+  }
+}
+
 @keyframes lemon-button-wobble {
   0% {
     transform: rotate(-3deg);
