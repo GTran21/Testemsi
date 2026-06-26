@@ -90,6 +90,10 @@ const stageTitleEl = document.getElementById("currentStageTitle");
 const stageDescriptionEl = document.getElementById("currentStageDescription");
 const treeForest = document.getElementById("treeForest");
 const upgradeList = document.getElementById("upgradeList");
+const saveCodeInput = document.getElementById("saveCodeInput");
+const exportSaveBtn = document.getElementById("exportSaveBtn");
+const loadSaveBtn = document.getElementById("loadSaveBtn");
+const saveStatusEl = document.getElementById("saveStatus");
 
 let lemons = 0;
 let clickBase = 1;
@@ -101,6 +105,7 @@ const treeRows = [];
 const farmerLanes = [];
 const farmers = [];
 const farmersPerRow = 3;
+const SAVE_CODE_PREFIX = "LSS1:";
 
 function getTreesPerRow() {
   const rootStyles = getComputedStyle(document.documentElement);
@@ -132,14 +137,13 @@ function createFarmerElement(slotInRow, farmerIndex) {
   farmer.style.setProperty("--farmer-duration", `${14 + (farmerIndex % 4) * 1.1}s`);
   farmer.style.setProperty("--farmer-delay", `${(farmerIndex % 5) * -0.7}s`);
 
-  const frameA = document.createElement("span");
-  frameA.className = "farmer-frame farmer-frame-a";
+  const frameClasses = ["farmer-frame-a", "farmer-frame-b", "farmer-frame-c", "farmer-frame-d"];
+  frameClasses.forEach((frameClass) => {
+    const frame = document.createElement("span");
+    frame.className = `farmer-frame ${frameClass}`;
+    farmer.appendChild(frame);
+  });
 
-  const frameB = document.createElement("span");
-  frameB.className = "farmer-frame farmer-frame-b";
-
-  farmer.appendChild(frameA);
-  farmer.appendChild(frameB);
   return farmer;
 }
 
@@ -155,6 +159,131 @@ function addFarmerForPickingAssistant() {
   const farmer = createFarmerElement(slotInRow, farmerIndex);
   farmerLanes[rowIndex].appendChild(farmer);
   farmers.push(farmer);
+}
+
+function clearForest() {
+  treeForest.innerHTML = "";
+  treeScenes.length = 0;
+  treeRows.length = 0;
+  farmerLanes.length = 0;
+  farmers.length = 0;
+}
+
+function setTreeCount(targetCount) {
+  const safeTarget = Math.max(1, Math.floor(targetCount));
+  while (treeScenes.length < safeTarget) {
+    addTreeIfSpaceAvailable();
+  }
+}
+
+function setFarmerCount(targetCount) {
+  const safeTarget = Math.max(0, Math.floor(targetCount));
+  while (farmers.length < safeTarget) {
+    addFarmerForPickingAssistant();
+  }
+}
+
+function setSaveStatus(message) {
+  if (saveStatusEl) {
+    saveStatusEl.textContent = message;
+  }
+}
+
+function recomputeDerivedStatsFromUpgrades() {
+  const clickUpgrade = upgrades.find((upgrade) => upgrade.id === "click-power");
+  const multiplierUpgrade = upgrades.find((upgrade) => upgrade.id === "multiplier");
+
+  clickBase = 1 + (clickUpgrade ? clickUpgrade.owned * clickUpgrade.amount : 0);
+  clickMultiplier = 1 + (multiplierUpgrade ? multiplierUpgrade.owned * multiplierUpgrade.amount : 0);
+  lemonsPerSecond = upgrades
+    .filter((upgrade) => upgrade.type === "auto")
+    .reduce((total, upgrade) => total + upgrade.owned * upgrade.amount, 0);
+}
+
+function getTargetFarmerCountFromUpgrades() {
+  const pickingAssistantsOwned = upgrades.find((upgrade) => upgrade.id === "autoclicker")?.owned ?? 0;
+  const orchardTeamsOwned = upgrades.find((upgrade) => upgrade.id === "orchard-team")?.owned ?? 0;
+  return pickingAssistantsOwned + orchardTeamsOwned * 3;
+}
+
+function getUpgradeOwnershipMap() {
+  return upgrades.reduce((acc, upgrade) => {
+    acc[upgrade.id] = upgrade.owned;
+    return acc;
+  }, {});
+}
+
+function applyUpgradeOwnershipMap(ownershipMap) {
+  upgrades.forEach((upgrade) => {
+    const loadedOwned = ownershipMap?.[upgrade.id];
+    upgrade.owned = Number.isFinite(loadedOwned) ? Math.max(0, Math.floor(loadedOwned)) : 0;
+  });
+}
+
+function exportSaveCode() {
+  const payload = {
+    version: 1,
+    lemons,
+    activeStageIndex,
+    treeCount: treeScenes.length,
+    farmerCount: farmers.length,
+    upgrades: getUpgradeOwnershipMap(),
+  };
+
+  const code = `${SAVE_CODE_PREFIX}${btoa(JSON.stringify(payload))}`;
+  if (saveCodeInput) {
+    saveCodeInput.value = code;
+    saveCodeInput.select();
+  }
+  setSaveStatus("Save code exported. Keep this code to resume later.");
+}
+
+function loadSaveCode() {
+  const rawCode = saveCodeInput ? saveCodeInput.value.trim() : "";
+  if (!rawCode) {
+    setSaveStatus("Paste a save code before loading.");
+    return;
+  }
+
+  if (!rawCode.startsWith(SAVE_CODE_PREFIX)) {
+    setSaveStatus("Invalid code format.");
+    return;
+  }
+
+  try {
+    const decodedJson = atob(rawCode.slice(SAVE_CODE_PREFIX.length));
+    const payload = JSON.parse(decodedJson);
+
+    if (!payload || payload.version !== 1) {
+      throw new Error("Unsupported save version");
+    }
+
+    lemons = Number.isFinite(payload.lemons) ? Math.max(0, payload.lemons) : 0;
+    activeStageIndex = Number.isFinite(payload.activeStageIndex)
+      ? Math.max(0, Math.min(stages.length - 1, Math.floor(payload.activeStageIndex)))
+      : 0;
+
+    applyUpgradeOwnershipMap(payload.upgrades);
+    recomputeDerivedStatsFromUpgrades();
+
+    clearForest();
+    const targetTreeCount = Number.isFinite(payload.treeCount)
+      ? Math.max(1, Math.floor(payload.treeCount))
+      : 1 + (upgrades.find((upgrade) => upgrade.id === "click-power")?.owned ?? 0);
+    setTreeCount(targetTreeCount);
+
+    const targetFarmerCount = Number.isFinite(payload.farmerCount)
+      ? Math.max(0, Math.floor(payload.farmerCount))
+      : getTargetFarmerCountFromUpgrades();
+    setFarmerCount(targetFarmerCount);
+
+    updateStageDisplay();
+    updateStats();
+    renderUpgrades();
+    setSaveStatus("Save code loaded. Progress restored.");
+  } catch (error) {
+    setSaveStatus("Could not load this save code.");
+  }
 }
 
 function createTreeSceneElement() {
@@ -288,6 +417,11 @@ function buyUpgrade(id) {
     if (upgrade.id === "autoclicker") {
       addFarmerForPickingAssistant();
     }
+    if (upgrade.id === "orchard-team") {
+      for (let i = 0; i < 3; i += 1) {
+        addFarmerForPickingAssistant();
+      }
+    }
   }
 
   updateStats();
@@ -307,6 +441,12 @@ function autoLemonTick() {
 }
 
 lemonClickBtn.addEventListener("click", clickLemon);
+if (exportSaveBtn) {
+  exportSaveBtn.addEventListener("click", exportSaveCode);
+}
+if (loadSaveBtn) {
+  loadSaveBtn.addEventListener("click", loadSaveCode);
+}
 
 addTreeIfSpaceAvailable();
 updateStageDisplay();

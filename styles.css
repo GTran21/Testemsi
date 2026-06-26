@@ -11,6 +11,7 @@
   --plant-scale: 0.4;
   --tree-root-contact-stage3-bottom: 17%;
   --tree-root-contact-stage4plus-bottom: 2%;
+  --tree-root-contact-stage5plus-bottom: -4%;
   --tree-gap: 2px;
   --min-tree-count: 5;
   --tree-scene-width: min(178px, calc((100% - (var(--tree-gap) * (var(--min-tree-count) - 1))) / var(--min-tree-count)));
@@ -228,8 +229,8 @@ h1 {
   position: absolute;
   left: -48px;
   bottom: calc(22% - 4px);
-  width: 38px;
-  height: 58px;
+  width: 98px;
+  height: 150px;
   animation: farmer-walk-path var(--farmer-duration) linear var(--farmer-delay) infinite;
 }
 
@@ -239,39 +240,39 @@ h1 {
   background-position: center bottom;
   background-repeat: no-repeat;
   background-size: contain;
+  opacity: 0;
+  animation: farmer-frame-visibility 0.9s steps(1) infinite;
 }
 
 .farmer-frame-a {
-  background-image: url("Lemon Tree Simulator.png");
-  animation: farmer-frame-a 0.9s steps(1) infinite;
+  background-image: url("Lemon Simulator.png");
+  animation-delay: 0s;
 }
 
 .farmer-frame-b {
-  background-image: url("Lemon Tree Simulator 1.png");
-  animation: farmer-frame-b 0.9s steps(1) infinite;
+  background-image: url("Lemon Simulator 1.png");
+  animation-delay: -0.225s;
 }
 
-@keyframes farmer-frame-a {
+.farmer-frame-c {
+  background-image: url("Lemon Simulator 2.png");
+  animation-delay: -0.45s;
+}
+
+.farmer-frame-d {
+  background-image: url("Lemon Simulator 3.png");
+  animation-delay: -0.675s;
+}
+
+@keyframes farmer-frame-visibility {
   0%,
-  49.999% {
+  24.999% {
     opacity: 1;
   }
 
-  50%,
+  25%,
   100% {
     opacity: 0;
-  }
-}
-
-@keyframes farmer-frame-b {
-  0%,
-  49.999% {
-    opacity: 0;
-  }
-
-  50%,
-  100% {
-    opacity: 1;
   }
 }
 
@@ -376,6 +377,56 @@ h1 {
   opacity: 0.5;
 }
 
+.save-panel {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 2px solid rgba(126, 90, 19, 0.38);
+  background: #fff8dd;
+}
+
+.save-panel h3 {
+  margin: 0;
+  font-size: 1.02rem;
+}
+
+.save-copy {
+  margin: 6px 0 8px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.save-code-input {
+  width: 100%;
+  resize: vertical;
+  min-height: 72px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 2px solid rgba(126, 90, 19, 0.38);
+  font-family: "Courier New", monospace;
+  font-size: 0.82rem;
+  color: #35260e;
+  background: #fffcf2;
+}
+
+.save-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.save-actions .upgrade-buy {
+  flex: 1;
+}
+
+.save-status {
+  min-height: 1.2em;
+  margin: 8px 0 0;
+  font-size: 0.84rem;
+  color: #5f470d;
+}
+
 .soil {
   position: absolute;
   left: 0;
@@ -439,7 +490,7 @@ h1 {
 }
 
 .young-tree-graphic {
-  bottom: var(--tree-root-contact-stage4plus-bottom);
+  bottom: var(--tree-root-contact-stage5plus-bottom);
   width: calc(430px * var(--plant-scale));
   height: calc(500px * var(--plant-scale));
   margin-left: calc(-215px * var(--plant-scale));
@@ -447,7 +498,7 @@ h1 {
 }
 
 .flowering-graphic {
-  bottom: var(--tree-root-contact-stage4plus-bottom);
+  bottom: var(--tree-root-contact-stage5plus-bottom);
   width: calc(430px * var(--plant-scale));
   height: calc(500px * var(--plant-scale));
   margin-left: calc(-215px * var(--plant-scale));
@@ -455,7 +506,7 @@ h1 {
 }
 
 .fruiting-graphic {
-  bottom: var(--tree-root-contact-stage4plus-bottom);
+  bottom: var(--tree-root-contact-stage5plus-bottom);
   width: calc(430px * var(--plant-scale));
   height: calc(500px * var(--plant-scale));
   margin-left: calc(-215px * var(--plant-scale));

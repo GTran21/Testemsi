@@ -46,6 +46,17 @@
         <h2 class="column-title">Store</h2>
         <p class="panel-copy">Spend lemons to grow faster and increase profits.</p>
         <div id="upgradeList" class="upgrade-list"></div>
+
+        <section class="save-panel" aria-label="Save and load game">
+          <h3>Save Code</h3>
+          <p class="save-copy">Export a code to resume this run later, or paste one to load.</p>
+          <textarea id="saveCodeInput" class="save-code-input" rows="4" placeholder="Paste save code here"></textarea>
+          <div class="save-actions">
+            <button id="exportSaveBtn" class="upgrade-buy" type="button">Export Code</button>
+            <button id="loadSaveBtn" class="upgrade-buy" type="button">Load Code</button>
+          </div>
+          <p id="saveStatus" class="save-status" aria-live="polite"></p>
+        </section>
       </aside>
     </main>
   </div>
