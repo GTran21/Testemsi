@@ -2,7 +2,7 @@ const stages = [
   {
     id: 1,
     name: "Seed",
-    description: "A lemon tree begins as a seed with the potential to sprout after moist soil and warmth.",
+    description: "A lemon tree begins as a seed with the potential to sprout after receiving enough water and nutrients.",
     className: "stage-1",
   },
   {
@@ -14,31 +14,31 @@ const stages = [
   {
     id: 3,
     name: "Seedling",
-    description: "The seed sends up a small stem and first leaves while still relying on steady moisture.",
+    description: "The seed sends up a small stem and first leaves, finally fully emerging from the soil.",
     className: "stage-3",
   },
   {
     id: 4,
     name: "Sapling",
-    description: "The young plant thickens and strengthens as it prepares for sustained above-ground growth.",
+    description: "The young plant thickens and strengthens its stem as it prepares to become a full-fledged tree.",
     className: "stage-4",
   },
   {
     id: 5,
     name: "Young Tree",
-    description: "The seedling grows stems and leaves as it develops a permanent root system.",
+    description: "The plant grows into a small tree with a woody trunk and branches.",
     className: "stage-5",
   },
   {
     id: 6,
     name: "Flowering",
-    description: "Small fragrant blossoms appear before pollination and fruit formation.",
+    description: "Small fragrant blossoms appear, waiting to be pollinated to produce fruit.",
     className: "stage-6",
   },
   {
     id: 7,
     name: "Fruiting",
-    description: "Lemons mature over weeks, showing the final stage of the tree's seasonal growth.",
+    description: "Lemons are produced after pollination and mature over weeks.",
     className: "stage-7",
   },
 ];
@@ -46,7 +46,7 @@ const stages = [
 const upgrades = [
   {
     id: "click-power",
-    name: "Bigger Basket",
+    name: "Plant New Tree",
     description: "+1 lemon per click",
     baseCost: 20,
     type: "click",
@@ -88,7 +88,7 @@ const lemonsPerClickEl = document.getElementById("lemonsPerClick");
 const lemonsPerSecondEl = document.getElementById("lemonsPerSecond");
 const stageTitleEl = document.getElementById("currentStageTitle");
 const stageDescriptionEl = document.getElementById("currentStageDescription");
-const treeScene = document.getElementById("treeScene");
+const treeForest = document.getElementById("treeForest");
 const upgradeList = document.getElementById("upgradeList");
 
 let lemons = 0;
@@ -96,6 +96,102 @@ let clickBase = 1;
 let clickMultiplier = 1;
 let lemonsPerSecond = 0;
 let activeStageIndex = 0;
+const treeScenes = [];
+const treeRows = [];
+const farmerLanes = [];
+const farmers = [];
+const farmersPerRow = 3;
+
+function getTreesPerRow() {
+  const rootStyles = getComputedStyle(document.documentElement);
+  const configuredCount = parseInt(rootStyles.getPropertyValue("--min-tree-count"), 10);
+  return Number.isFinite(configuredCount) && configuredCount > 0 ? configuredCount : 5;
+}
+
+function createTreeRowTrack() {
+  const row = document.createElement("div");
+  row.className = "tree-row";
+
+  const track = document.createElement("div");
+  track.className = "tree-row-track";
+  row.appendChild(track);
+
+  const farmerLane = document.createElement("div");
+  farmerLane.className = "farmer-lane";
+  row.appendChild(farmerLane);
+
+  treeForest.appendChild(row);
+  treeRows.push(track);
+  farmerLanes.push(farmerLane);
+  return track;
+}
+
+function createFarmerElement(slotInRow, farmerIndex) {
+  const farmer = document.createElement("div");
+  farmer.className = "farmer";
+  farmer.style.setProperty("--farmer-duration", `${14 + (farmerIndex % 4) * 1.1}s`);
+  farmer.style.setProperty("--farmer-delay", `${(farmerIndex % 5) * -0.7}s`);
+
+  const frameA = document.createElement("span");
+  frameA.className = "farmer-frame farmer-frame-a";
+
+  const frameB = document.createElement("span");
+  frameB.className = "farmer-frame farmer-frame-b";
+
+  farmer.appendChild(frameA);
+  farmer.appendChild(frameB);
+  return farmer;
+}
+
+function addFarmerForPickingAssistant() {
+  const farmerIndex = farmers.length;
+  const rowIndex = Math.floor(farmerIndex / farmersPerRow);
+  const slotInRow = farmerIndex % farmersPerRow;
+
+  while (farmerLanes.length <= rowIndex) {
+    createTreeRowTrack();
+  }
+
+  const farmer = createFarmerElement(slotInRow, farmerIndex);
+  farmerLanes[rowIndex].appendChild(farmer);
+  farmers.push(farmer);
+}
+
+function createTreeSceneElement() {
+  const scene = document.createElement("div");
+  scene.className = "tree-scene stage-1";
+  scene.innerHTML = `
+    <div class="germination-graphic"></div>
+    <div class="seedling-graphic"></div>
+    <div class="sapling-graphic"></div>
+    <div class="young-tree-graphic"></div>
+    <div class="flowering-graphic"></div>
+    <div class="fruiting-graphic"></div>
+    <div class="trunk"></div>
+    <div class="branch branch-left"></div>
+    <div class="branch branch-right"></div>
+    <div class="leaf-group leaves-left"></div>
+    <div class="leaf-group leaves-right"></div>
+    <div class="flower"></div>
+    <div class="lemon"></div>
+    <div class="sprout"></div>
+    <div class="seed"></div>
+  `;
+  return scene;
+}
+
+function addTreeIfSpaceAvailable() {
+  let activeRow = treeRows[treeRows.length - 1];
+  if (!activeRow || activeRow.children.length >= getTreesPerRow()) {
+    activeRow = createTreeRowTrack();
+  }
+
+  const scene = createTreeSceneElement();
+  activeRow.appendChild(scene);
+  treeScenes.push(scene);
+  scene.className = `tree-scene ${stages[activeStageIndex].className}`;
+  return true;
+}
 
 function getCurrentClickValue() {
   return Math.max(1, Math.floor(clickBase * clickMultiplier));
@@ -113,7 +209,9 @@ function updateStageDisplay() {
   const stage = stages[activeStageIndex];
   stageTitleEl.textContent = stage.name;
   stageDescriptionEl.textContent = stage.description;
-  treeScene.className = `tree-scene ${stage.className}`;
+  treeScenes.forEach((scene) => {
+    scene.className = `tree-scene ${stage.className}`;
+  });
 }
 
 function tickStage() {
@@ -182,10 +280,14 @@ function buyUpgrade(id) {
 
   if (upgrade.type === "click") {
     clickBase += upgrade.amount;
+    addTreeIfSpaceAvailable();
   } else if (upgrade.type === "multiplier") {
     clickMultiplier += upgrade.amount;
   } else if (upgrade.type === "auto") {
     lemonsPerSecond += upgrade.amount;
+    if (upgrade.id === "autoclicker") {
+      addFarmerForPickingAssistant();
+    }
   }
 
   updateStats();
@@ -206,6 +308,7 @@ function autoLemonTick() {
 
 lemonClickBtn.addEventListener("click", clickLemon);
 
+addTreeIfSpaceAvailable();
 updateStageDisplay();
 updateStats();
 renderUpgrades();
