@@ -4,9 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lemon Store Simulator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400..700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div class="theme-mode-controls" aria-label="Default site themes">
+    <button id="themeLightModeBtn" class="mode-toggle-btn" type="button">Light Mode</button>
+    <button id="themeDarkModeBtn" class="mode-toggle-btn" type="button">Dark Mode</button>
+  </div>
+
   <div class="page-shell">
     <main class="game-layout">
       <section class="click-column">
@@ -28,6 +36,10 @@
             <p>Lemons Per Second</p>
             <h2 id="lemonsPerSecond">0</h2>
           </article>
+          <article>
+            <p>Total Lemons Harvested</p>
+            <h2 id="totalLemonsHarvested">0</h2>
+          </article>
         </div>
       </section>
 
@@ -40,12 +52,98 @@
           <h2 id="currentStageTitle">Seed</h2>
           <p id="currentStageDescription">A lemon tree begins as a seed with the potential to sprout after moist soil and warmth.</p>
         </div>
+
+        <p id="farmScrollHint" class="farm-scroll-hint" hidden>Scroll down to see the rest of your lemon farm.</p>
       </section>
 
       <aside class="store-column">
         <h2 class="column-title">Store</h2>
-        <p class="panel-copy">Spend lemons to grow faster and increase profits.</p>
-        <div id="upgradeList" class="upgrade-list"></div>
+        <p class="panel-copy">Spend lemons to increase profits and unlock cool stuff.</p>
+        <div class="store-tabs" role="tablist" aria-label="Store sections">
+          <button id="storeUpgradesTabBtn" class="store-tab-button is-active" type="button" role="tab" aria-selected="true">Upgrades</button>
+          <button id="storeBrandingTabBtn" class="store-tab-button" type="button" role="tab" aria-selected="false" disabled>Store Branding</button>
+        </div>
+
+        <div class="store-panels">
+          <section id="upgradesPanel" class="store-panel" role="tabpanel">
+            <div id="upgradeList" class="upgrade-list"></div>
+          </section>
+
+          <section id="brandingPanel" class="store-panel" role="tabpanel" hidden>
+            <p class="panel-copy">Choose colors for the site background, section surfaces, overlays, buttons, borders, and text.</p>
+            <div class="branding-controls">
+              <label class="branding-field" for="brandColorWheel">
+                <span>Site background</span>
+                <input id="brandColorWheel" type="color" value="#f0df9b" />
+              </label>
+
+              <label class="branding-field" for="brandHexInput">
+                <span>Site background hex code</span>
+                <input id="brandHexInput" type="text" inputmode="text" spellcheck="false" autocomplete="off" maxlength="7" value="#f0df9b" placeholder="#f0df9b" />
+              </label>
+
+              <label class="branding-field" for="surfaceColorInput">
+                <span>Main section color</span>
+                <input id="surfaceColorInput" type="color" value="#f7e7b4" />
+              </label>
+
+              <label class="branding-field" for="surfaceHexInput">
+                <span>Main section color hex code</span>
+                <input id="surfaceHexInput" type="text" inputmode="text" spellcheck="false" autocomplete="off" maxlength="7" value="#f7e7b4" placeholder="#f7e7b4" />
+              </label>
+
+              <label class="branding-field" for="surfaceGradientColorInput">
+                <span>Section gradient color</span>
+                <input id="surfaceGradientColorInput" type="color" value="#f4de9f" />
+              </label>
+
+              <label class="branding-field" for="surfaceGradientHexInput">
+                <span>Section gradient hex code</span>
+                <input id="surfaceGradientHexInput" type="text" inputmode="text" spellcheck="false" autocomplete="off" maxlength="7" value="#f4de9f" placeholder="#f4de9f" />
+              </label>
+
+              <label class="branding-field" for="overlayColorInput">
+                <span>Section overlays</span>
+                <input id="overlayColorInput" type="color" value="#fff4c9" />
+              </label>
+
+              <label class="branding-field" for="overlayHexInput">
+                <span>Section overlay hex code</span>
+                <input id="overlayHexInput" type="text" inputmode="text" spellcheck="false" autocomplete="off" maxlength="7" value="#fff4c9" placeholder="#fff4c9" />
+              </label>
+
+              <label class="branding-field" for="buttonColorInput">
+                <span>Buttons</span>
+                <input id="buttonColorInput" type="color" value="#f0b936" />
+              </label>
+
+              <label class="branding-field" for="buttonHexInput">
+                <span>Button hex code</span>
+                <input id="buttonHexInput" type="text" inputmode="text" spellcheck="false" autocomplete="off" maxlength="7" value="#f0b936" placeholder="#f0b936" />
+              </label>
+
+              <label class="branding-field" for="borderColorInput">
+                <span>Borders</span>
+                <input id="borderColorInput" type="color" value="#876226" />
+              </label>
+
+              <label class="branding-field" for="borderHexInput">
+                <span>Borders hex code</span>
+                <input id="borderHexInput" type="text" inputmode="text" spellcheck="false" autocomplete="off" maxlength="7" value="#876226" placeholder="#876226" />
+              </label>
+
+              <label class="branding-field" for="textColorInput">
+                <span>Site text</span>
+                <input id="textColorInput" type="color" value="#2d2b1f" />
+              </label>
+
+              <label class="branding-field" for="textHexInput">
+                <span>Site text hex code</span>
+                <input id="textHexInput" type="text" inputmode="text" spellcheck="false" autocomplete="off" maxlength="7" value="#2d2b1f" placeholder="#2d2b1f" />
+              </label>
+            </div>
+          </section>
+        </div>
 
         <section class="save-panel" aria-label="Save and load game">
           <h3>Save Code</h3>
